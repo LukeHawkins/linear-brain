@@ -30,7 +30,9 @@
     "dev": "concurrently -n api,web -c blue,green \"bun run --watch src/index.ts\" \"cd web && bunx vite\"",
     "build:web": "cd web && bunx vite build",
     "start": "bun run build:web && bun run src/index.ts",
-    "test": "bun test"
+    "test": "bun test",
+    "screenshots:setup": "bunx playwright install chromium",
+    "screenshots": "bun scripts/run-screenshots.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -38,6 +40,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "concurrently": "^9.2.1",
+    "playwright": "^1.59.1",
     "vite": "^8.0.0"
   },
   "peerDependencies": {

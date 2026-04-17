@@ -102,3 +102,13 @@ export interface Insight {
   content: string;
   issue_count: number;
 }
+
+export interface JanPoem {
+  id: string;
+  created_at: string;
+  poem: string;
+}
+
+export interface ConfigFlags {
+  janPoemEnabled: boolean;
+}

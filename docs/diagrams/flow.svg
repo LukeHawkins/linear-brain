@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 680" width="820" height="680" role="img" aria-labelledby="title desc">
+  <title id="title">Linear Brain — data flow</title>
+  <desc id="desc">Linear Brain reads from Linear, AI actions produce proposals or insights, a human approves or rejects each proposal, and only approved proposals write back to Linear.</desc>
+
+  <defs>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a1a1aa" />
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a78bfa" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4ade80" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#ef4444" />
+    </marker>
+    <style>
+      .card { fill: #18181b; stroke: #27272a; stroke-width: 1; }
+      .card-purple { fill: #1a1627; stroke: #a78bfa; stroke-width: 1.5; }
+      .card-dashed { fill: #18181b; stroke: #3f3f46; stroke-width: 1; stroke-dasharray: 4 4; }
+      .t-title { fill: #fafafa; font-size: 14px; font-weight: 600; }
+      .t-body  { fill: #fafafa; font-size: 13px; }
+      .t-muted { fill: #a1a1aa; font-size: 11px; }
+      .t-dim   { fill: #71717a; font-size: 11px; }
+      .t-purple { fill: #a78bfa; }
+      .t-green  { fill: #4ade80; }
+      .t-red    { fill: #ef4444; }
+      .gate-title { fill: #a78bfa; font-size: 15px; font-weight: 700; letter-spacing: 0.08em; }
+      .edge-muted  { stroke: #a1a1aa; stroke-width: 1.5; fill: none; }
+      .edge-purple { stroke: #a78bfa; stroke-width: 2;   fill: none; }
+      .edge-green  { stroke: #4ade80; stroke-width: 2;   fill: none; }
+      .edge-red    { stroke: #ef4444; stroke-width: 2;   fill: none; }
+      .edge-return { stroke: #4ade80; stroke-width: 1.5; fill: none; stroke-dasharray: 5 4; opacity: 0.7; }
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Surrounding card so the diagram reads as a panel on any theme -->
+  <rect x="0.5" y="0.5" width="819" height="679" rx="14" fill="#0c0c0c" stroke="#27272a" />
+
+  <!-- 1. Linear board -->
+  <g>
+    <rect class="card" x="330" y="28" width="160" height="52" rx="10" />
+    <text class="t-title" x="410" y="50" text-anchor="middle">Your Linear board</text>
+    <text class="t-muted" x="410" y="68" text-anchor="middle">source of truth</text>
+  </g>
+
+  <!-- Edge: Linear → reader -->
+  <line class="edge-muted" x1="410" y1="82" x2="410" y2="112" marker-end="url(#arrow-muted)" />
+  <text class="t-muted" x="418" y="101">read only</text>
+
+  <!-- 2. reader.ts -->
+  <g>
+    <rect class="card" x="320" y="116" width="180" height="44" rx="8" />
+    <text class="t-body" x="410" y="144" text-anchor="middle">reader.ts <tspan class="t-muted">— free reads</tspan></text>
+  </g>
+
+  <!-- Fan-out to 3 actions -->
+  <line class="edge-muted" x1="410" y1="162" x2="410" y2="182" />
+  <line class="edge-muted" x1="140" y1="182" x2="680" y2="182" />
+  <line class="edge-muted" x1="140" y1="182" x2="140" y2="206" marker-end="url(#arrow-muted)" />
+  <line class="edge-muted" x1="410" y1="182" x2="410" y2="206" marker-end="url(#arrow-muted)" />
+  <line class="edge-muted" x1="680" y1="182" x2="680" y2="206" marker-end="url(#arrow-muted)" />
+
+  <!-- 3. Three AI actions -->
+  <g>
+    <rect class="card" x="50" y="210" width="180" height="66" rx="10" />
+    <text class="t-title" x="140" y="238" text-anchor="middle">Tidy Drafts</text>
+    <text class="t-muted" x="140" y="258" text-anchor="middle">Claude Code, locally</text>
+  </g>
+  <g>
+    <rect class="card" x="320" y="210" width="180" height="66" rx="10" />
+    <text class="t-title" x="410" y="238" text-anchor="middle">Audit Board</text>
+    <text class="t-muted" x="410" y="258" text-anchor="middle">Claude Code, locally</text>
+  </g>
+  <g>
+    <rect class="card" x="590" y="210" width="180" height="66" rx="10" />
+    <text class="t-title" x="680" y="238" text-anchor="middle">Generate Insight</text>
+    <text class="t-muted" x="680" y="258" text-anchor="middle">Claude Code, locally</text>
+  </g>
+
+  <!-- Merge Tidy + Audit into Proposals; Insight goes straight to Insights -->
+  <line class="edge-muted" x1="140" y1="276" x2="140" y2="296" />
+  <line class="edge-muted" x1="410" y1="276" x2="410" y2="296" />
+  <line class="edge-muted" x1="140" y1="296" x2="410" y2="296" />
+  <line class="edge-muted" x1="275" y1="296" x2="275" y2="318" marker-end="url(#arrow-muted)" />
+
+  <line class="edge-muted" x1="680" y1="276" x2="680" y2="318" marker-end="url(#arrow-muted)" />
+
+  <!-- 4. Proposals + Insight report -->
+  <g>
+    <rect class="card-purple" x="185" y="322" width="180" height="56" rx="10" />
+    <text class="t-title t-purple" x="275" y="348" text-anchor="middle">Proposals queue</text>
+    <text class="t-muted" x="275" y="366" text-anchor="middle">suggested changes</text>
+  </g>
+  <g>
+    <rect class="card" x="590" y="322" width="180" height="56" rx="10" />
+    <text class="t-title" x="680" y="348" text-anchor="middle">Insight report</text>
+    <text class="t-muted" x="680" y="366" text-anchor="middle">read-only, stored</text>
+  </g>
+
+  <!-- Arrow down to gate -->
+  <line class="edge-purple" x1="275" y1="378" x2="275" y2="410" marker-end="url(#arrow-purple)" />
+  <text class="t-muted t-purple" x="290" y="398">you review each one</text>
+
+  <!-- 5. THE GATE -->
+  <g>
+    <rect class="card-purple" x="110" y="414" width="600" height="82" rx="12" />
+    <text class="gate-title" x="410" y="446" text-anchor="middle">HUMAN APPROVES OR REJECTS</text>
+    <text class="t-muted" x="410" y="470" text-anchor="middle">nothing reaches Linear until you click Approve</text>
+    <text class="t-dim" x="410" y="486" text-anchor="middle">every action is logged to the audit trail</text>
+  </g>
+
+  <!-- Two outputs -->
+  <line class="edge-green" x1="275" y1="496" x2="275" y2="528" marker-end="url(#arrow-green)" />
+  <text class="t-muted t-green" x="289" y="516">approved</text>
+
+  <line class="edge-red" x1="545" y1="496" x2="545" y2="528" marker-end="url(#arrow-red)" />
+  <text class="t-muted t-red" x="559" y="516">rejected</text>
+
+  <!-- 6. Executor / dead end -->
+  <g>
+    <rect class="card" x="175" y="532" width="200" height="56" rx="10" />
+    <text class="t-title" x="275" y="558" text-anchor="middle">executor → writer.ts</text>
+    <text class="t-muted" x="275" y="576" text-anchor="middle">the only path that writes</text>
+  </g>
+  <g>
+    <rect class="card-dashed" x="445" y="532" width="200" height="56" rx="10" />
+    <text class="t-body" x="545" y="558" text-anchor="middle">no effect on Linear</text>
+    <text class="t-dim" x="545" y="576" text-anchor="middle">logged and done</text>
+  </g>
+
+  <!-- Return edge: executor writes back to Linear — drops down into the gap between boxes,
+       then hugs the right edge so it crosses nothing. -->
+  <path class="edge-return" d="M 375,560 V 604 H 790 Q 800,604 800,594 V 64 Q 800,54 790,54 H 490" marker-end="url(#arrow-green)" />
+
+  <!-- Legend (bottom left) -->
+  <g transform="translate(50, 620)">
+    <rect x="0" y="0" width="370" height="44" rx="8" fill="#0c0c0c" stroke="#27272a" />
+    <circle cx="16" cy="22" r="4" fill="#a78bfa" />
+    <text class="t-muted" x="28" y="26">purple = the human-review gate</text>
+    <circle cx="210" cy="22" r="4" fill="#4ade80" />
+    <text class="t-muted" x="222" y="26">green = approved write path</text>
+  </g>
+</svg>

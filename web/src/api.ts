@@ -1,4 +1,4 @@
-import type { Proposal, ProposalStatus, AuditEntry, DashboardSnapshot, Insight } from "./types";
+import type { Proposal, ProposalStatus, AuditEntry, DashboardSnapshot, Insight, JanPoem, ConfigFlags } from "./types";
 
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -70,4 +70,16 @@ export function fetchInsights(): Promise<Insight[]> {
 
 export function generateInsight(): Promise<{ id: string; created_at: string }> {
   return request("/api/insights/generate", { method: "POST" });
+}
+
+export function fetchConfigFlags(): Promise<ConfigFlags> {
+  return request<ConfigFlags>("/api/config/flags");
+}
+
+export function fetchJanPoems(): Promise<JanPoem[]> {
+  return request<JanPoem[]>("/api/actions/jan-poem");
+}
+
+export function generateJanPoem(): Promise<JanPoem> {
+  return request<JanPoem>("/api/actions/jan-poem", { method: "POST" });
 }

@@ -15,6 +15,8 @@ import { saveSnapshot, getLatestSnapshot, getLastSnapshotTime } from "../../dash
 import { runCleanDrafts } from "../../actions/clean-drafts.ts";
 import { runAuditBoard } from "../../actions/audit-board.ts";
 import { runGenerateInsight, getInsights } from "../../actions/generate-insight.ts";
+import { runJanPoem, getJanPoems } from "../../actions/jan-poem.ts";
+import { config } from "../../config.ts";
 
 const api = new Hono();
 
@@ -265,6 +267,35 @@ api.post("/api/insights/generate", async (c) => {
     return c.json(result, 201);
   } catch (err) {
     console.error("[api] POST /api/insights/generate", err);
+    return c.json({ error: String(err) }, 500);
+  }
+});
+
+// GET /api/config/flags — feature flags the frontend needs to know about
+api.get("/api/config/flags", (c) => {
+  return c.json({ janPoemEnabled: config.janPoemEnabled });
+});
+
+// GET /api/actions/jan-poem — list recent poems (hidden feature)
+api.get("/api/actions/jan-poem", (c) => {
+  if (!config.janPoemEnabled) return c.json({ error: "Not found" }, 404);
+  try {
+    const poems = getJanPoems();
+    return c.json(poems);
+  } catch (err) {
+    console.error("[api] GET /api/actions/jan-poem", err);
+    return c.json({ error: "Internal server error" }, 500);
+  }
+});
+
+// POST /api/actions/jan-poem — generate a new poem (hidden feature)
+api.post("/api/actions/jan-poem", async (c) => {
+  if (!config.janPoemEnabled) return c.json({ error: "Not found" }, 404);
+  try {
+    const result = await runJanPoem();
+    return c.json(result, 201);
+  } catch (err) {
+    console.error("[api] POST /api/actions/jan-poem", err);
     return c.json({ error: String(err) }, 500);
   }
 });

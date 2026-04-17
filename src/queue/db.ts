@@ -61,6 +61,14 @@ function initDb(): Database {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS jan_poems (
+      id           TEXT PRIMARY KEY,
+      created_at   TEXT NOT NULL,
+      poem         TEXT NOT NULL
+    )
+  `);
+
   console.log(`[db] Opened database at ${config.databasePath}`);
   return db;
 }

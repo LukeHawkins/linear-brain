@@ -13,6 +13,8 @@ export const config = {
   linearWebhookSecret: process.env.LINEAR_WEBHOOK_SECRET ?? null,
   port: Number(process.env.PORT ?? 3000),
   databasePath: process.env.DATABASE_PATH ?? "./data/brain.db",
+  janPoemEnabled: process.env.ENABLE_JAN_POEM === "true",
+  janName: process.env.JAN_NAME ?? "Jan Slonka",
 };
 
 export type Config = typeof config;

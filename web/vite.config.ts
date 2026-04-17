@@ -9,10 +9,10 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      "/api": "http://localhost:3000",
-      "/webhooks": "http://localhost:3000",
-      "/health": "http://localhost:3000",
-      "/debug": "http://localhost:3000",
+      "/api": "http://localhost:3001",
+      "/webhooks": "http://localhost:3001",
+      "/health": "http://localhost:3001",
+      "/debug": "http://localhost:3001",
     },
   },
 });

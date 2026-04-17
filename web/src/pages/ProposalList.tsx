@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Table, Tag, Button, Popconfirm, App, Typography, Flex, Card, Badge,
-  Collapse, Empty, Space, Tooltip,
+  Collapse, Empty, Space, Tooltip, Modal, Spin,
 } from "antd";
-import { CheckOutlined, CloseOutlined, HistoryOutlined, InboxOutlined, ClearOutlined, AuditOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, HistoryOutlined, InboxOutlined, ClearOutlined, AuditOutlined, SmileOutlined, ReloadOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { Proposal, ProposalStatus } from "../types";
-import { fetchProposals, approveProposal, approveAll, rejectAll, cleanDrafts, auditBoard } from "../api";
+import type { Proposal, ProposalStatus, JanPoem } from "../types";
+import { fetchProposals, approveProposal, approveAll, rejectAll, cleanDrafts, auditBoard, fetchConfigFlags, fetchJanPoems, generateJanPoem } from "../api";
 
 const { Text, Title } = Typography;
 
@@ -28,6 +28,11 @@ export default function ProposalList() {
   const [loading, setLoading] = useState(true);
   const [tidying, setTidying] = useState(false);
   const [auditing, setAuditing] = useState(false);
+  const [janPoemEnabled, setJanPoemEnabled] = useState(false);
+  const [poemModalOpen, setPoemModalOpen] = useState(false);
+  const [poems, setPoems] = useState<JanPoem[]>([]);
+  const [poemsLoading, setPoemsLoading] = useState(false);
+  const [composing, setComposing] = useState(false);
   const { message, notification } = App.useApp();
 
   const load = async () => {
@@ -42,6 +47,39 @@ export default function ProposalList() {
   };
 
   useEffect(() => { load(); }, []);
+
+  useEffect(() => {
+    fetchConfigFlags()
+      .then((flags) => setJanPoemEnabled(flags.janPoemEnabled))
+      .catch(() => setJanPoemEnabled(false));
+  }, []);
+
+  const openPoemModal = async () => {
+    setPoemModalOpen(true);
+    setPoemsLoading(true);
+    try {
+      setPoems(await fetchJanPoems());
+    } catch (err) {
+      message.error(String(err));
+    } finally {
+      setPoemsLoading(false);
+    }
+  };
+
+  const handleComposePoem = async () => {
+    setComposing(true);
+    try {
+      const fresh = await generateJanPoem();
+      setPoems((prev) => [fresh, ...prev]);
+    } catch (err) {
+      notification.error({
+        message: "Poem generation failed",
+        description: String(err),
+      });
+    } finally {
+      setComposing(false);
+    }
+  };
 
   const handleApprove = async (id: string) => {
     try {
@@ -202,6 +240,16 @@ export default function ProposalList() {
           )}
         </Flex>
         <Space>
+          {/* Internal easter egg — only renders when the install opts in via ENABLE_JAN_POEM. */}
+          {janPoemEnabled && (
+            <Tooltip title="A little poem for Jan">
+              <Button
+                icon={<SmileOutlined />}
+                onClick={openPoemModal}
+                disabled={tidying || auditing}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Audit the whole board for issues, inconsistencies, and improvements">
             <Button
               icon={<AuditOutlined />}
@@ -265,6 +313,104 @@ export default function ProposalList() {
           />
         )}
       </Card>
+
+      {/* Jan poem modal (hidden feature) */}
+      <Modal
+        open={poemModalOpen}
+        onCancel={() => setPoemModalOpen(false)}
+        footer={null}
+        title={
+          <Flex align="center" gap={8}>
+            <SmileOutlined style={{ color: "#a78bfa" }} />
+            <span>A Poem for Jan</span>
+          </Flex>
+        }
+        width={560}
+      >
+        {poemsLoading ? (
+          <Flex justify="center" style={{ padding: "40px 0" }}>
+            <Spin />
+          </Flex>
+        ) : (
+          <>
+            {poems[0] ? (
+              <Card bordered style={{ marginBottom: 16, background: "#18181b" }}>
+                <Typography.Paragraph
+                  style={{
+                    margin: 0,
+                    whiteSpace: "pre-wrap",
+                    fontFamily: "Georgia, 'Times New Roman', serif",
+                    fontStyle: "italic",
+                    fontSize: 15,
+                    lineHeight: 1.7,
+                    color: "#fafafa",
+                  }}
+                >
+                  {poems[0].poem}
+                </Typography.Paragraph>
+                <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 12 }}>
+                  {new Date(poems[0].created_at).toLocaleString("en-GB")}
+                </Text>
+              </Card>
+            ) : (
+              <Empty
+                image={<SmileOutlined style={{ fontSize: 40, color: "#71717a" }} />}
+                description={<Text type="secondary">No poems yet. Compose the first one.</Text>}
+                style={{ marginBottom: 16 }}
+              />
+            )}
+
+            <Flex justify="flex-end" style={{ marginBottom: poems.length > 1 ? 16 : 0 }}>
+              <Button
+                type="primary"
+                icon={<ReloadOutlined />}
+                loading={composing}
+                onClick={handleComposePoem}
+              >
+                {composing ? "Composing..." : poems.length > 0 ? "Compose new" : "Compose"}
+              </Button>
+            </Flex>
+
+            {poems.length > 1 && (
+              <Collapse
+                ghost
+                items={[{
+                  key: "history",
+                  label: (
+                    <Flex align="center" gap={8}>
+                      <HistoryOutlined />
+                      <Text type="secondary">Earlier poems ({poems.length - 1})</Text>
+                    </Flex>
+                  ),
+                  children: (
+                    <Flex vertical gap={12}>
+                      {poems.slice(1).map((p) => (
+                        <Card key={p.id} bordered size="small" style={{ background: "#0c0c0c" }}>
+                          <Typography.Paragraph
+                            style={{
+                              margin: 0,
+                              whiteSpace: "pre-wrap",
+                              fontFamily: "Georgia, 'Times New Roman', serif",
+                              fontStyle: "italic",
+                              fontSize: 13,
+                              lineHeight: 1.6,
+                            }}
+                          >
+                            {p.poem}
+                          </Typography.Paragraph>
+                          <Text type="secondary" style={{ fontSize: 11, display: "block", marginTop: 8 }}>
+                            {new Date(p.created_at).toLocaleString("en-GB")}
+                          </Text>
+                        </Card>
+                      ))}
+                    </Flex>
+                  ),
+                }]}
+              />
+            )}
+          </>
+        )}
+      </Modal>
 
       {/* History accordion */}
       {history.length > 0 && (
